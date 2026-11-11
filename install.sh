@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
@@ -224,6 +223,30 @@ case "${answer}" in
         exit 0
         ;;
 esac
+
+# Authenticate sudo once before starting installation.
+echo
+echo "============================================================"
+echo "SUDO AUTHENTICATION"
+echo "============================================================"
+echo "Please enter your password. It will be cached for installation."
+
+sudo -v || fail "Sudo authentication failed."
+
+# Keep sudo credentials alive throughout the installation.
+while true; do
+    sudo -n -v
+    sleep 60
+    kill -0 "$$" || exit
+done 2>/dev/null &
+
+SUDO_KEEPALIVE_PID=$!
+
+cleanup() {
+    kill "${SUDO_KEEPALIVE_PID}" 2>/dev/null || true
+}
+
+trap cleanup EXIT
 
 # Initialize logging after confirmation.
 mkdir -p "${LOG_DIR}"

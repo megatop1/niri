@@ -85,8 +85,7 @@ sudo apt install -y \
     libsndfile1-dev \
     librsvg2-dev \
     libstb-dev \
-    libsdbus-c++-dev \
-    libwireplumber-0.5-dev
+    libsdbus-c++-dev
 
 echo
 echo "Base packages installed."
