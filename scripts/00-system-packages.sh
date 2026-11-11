@@ -63,7 +63,30 @@ sudo apt install -y \
     fonts-ubuntu \
     fonts-noto \
     brightnessctl \
-    playerctl
+    playerctl \
+    libegl-dev \
+    libgles-dev \
+    libfreetype-dev \
+    libfontconfig-dev \
+    libcairo2-dev \
+    libharfbuzz-dev \
+    libpolkit-agent-1-dev \
+    libpolkit-gobject-1-dev \
+    libcurl4-openssl-dev \
+    libqalculate-dev \
+    libxml2-dev \
+    libmd4c-dev \
+    libtomlplusplus-dev \
+    libical-dev \
+    nlohmann-json3-dev \
+    libpam0g-dev \
+    libwebp-dev \
+    libjxl-dev \
+    libsndfile1-dev \
+    librsvg2-dev \
+    libstb-dev \
+    libsdbus-c++-dev \
+    libwireplumber-0.5-dev
 
 echo
 echo "Base packages installed."
