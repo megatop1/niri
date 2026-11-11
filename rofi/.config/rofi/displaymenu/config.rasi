@@ -1,0 +1,86 @@
+configuration {
+    show-icons: false;
+}
+
+@import ".config/rofi/shared/colors.rasi"
+@import ".config/rofi/shared/fonts.rasi"
+
+* {
+    bg:       @surface;
+    bg-alt:   @surface-container;
+    fg:       @on-surface;
+    accent:   @primary;
+    on-accent: @on-primary;
+    selected-normal-background: @primary;
+    selected-normal-foreground: @on-primary;
+
+    background-color: transparent;
+    text-color:       @fg;
+}
+
+window {
+    transparency:     "real";
+    location:         center;
+    anchor:           center;
+    width:            380px;
+    border:           2px solid;
+    border-radius:    4px;
+    border-color:     @accent;
+    background-color: @bg;
+    cursor:           "default";
+}
+
+mainbox {
+    spacing:          0;
+    padding:          12px;
+    background-color: transparent;
+    children:         [ "message", "listview" ];
+}
+
+message {
+    padding:          10px 14px;
+    border-radius:    4px;
+    margin:           0 0 10px 0;
+    background-color: @bg-alt;
+    text-color:       @fg;
+}
+
+textbox {
+    background-color: transparent;
+    text-color:       @fg;
+    vertical-align:   0.5;
+    horizontal-align: 0.0;
+    markup:           true;
+}
+
+listview {
+    columns:          1;
+    lines:            4;
+    cycle:            true;
+    dynamic:          false;
+    scrollbar:        false;
+    fixed-height:     true;
+    spacing:          4px;
+    background-color: transparent;
+    cursor:           "default";
+}
+
+element {
+    padding:          8px 12px;
+    border-radius:    4px;
+    background-color: transparent;
+    text-color:       @fg;
+    cursor:           pointer;
+}
+
+element-text {
+    background-color: transparent;
+    text-color:       inherit;
+    vertical-align:   0.5;
+    horizontal-align: 0.0;
+    cursor:           inherit;
+}
+
+element normal.normal  { background-color: transparent; text-color: @fg;       }
+element alternate.normal { background-color: transparent; text-color: @fg;     }
+element selected.normal { background-color: @accent;    text-color: @on-accent; }

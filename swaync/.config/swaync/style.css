@@ -1,0 +1,158 @@
+* {
+  font-family: "JetBrainsMono Nerd Font Propo", monospace;
+  font-size: 13px;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  transition: background 120ms ease;
+}
+
+.floating-notifications {
+  background: transparent;
+}
+
+.notification-row {
+  outline: none;
+}
+
+.notification {
+  margin: 4px 8px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.notification-content {
+  background: #1e1e2e;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #cdd6f4;
+}
+
+.notification-default-action {
+  background: transparent;
+  border-radius: 8px;
+  padding: 0;
+}
+
+.notification-default-action:hover {
+  background: #181825;
+}
+
+.close-button {
+  background: transparent;
+  color: #45475a;
+  border-radius: 4px;
+  margin: 4px;
+  min-width: 18px;
+  min-height: 18px;
+  font-size: 11px;
+}
+
+.close-button:hover {
+  background: #313244;
+  color: #f38ba8;
+}
+
+.notification-action-button {
+  background: #313244;
+  color: #cdd6f4;
+  border-radius: 6px;
+  margin: 2px 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.notification-action-button:hover {
+  background: #45475a;
+}
+
+.notification-app-icon {
+  border-radius: 6px;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.urgency-low      { border-left: 2px solid #89b4fa; }
+.urgency-normal   { border-left: 2px solid #89dceb; }
+.urgency-critical { border-left: 2px solid #f38ba8; }
+
+.control-center {
+  background: #11111b;
+  color: #cdd6f4;
+  padding: 8px;
+  border-radius: 12px;
+}
+
+.control-center-list {
+  background: transparent;
+}
+
+.control-center-list-placeholder {
+  opacity: 0.3;
+  color: #6c7086;
+}
+
+.widget-title {
+  color: #cdd6f4;
+  font-size: 12px;
+  font-weight: bold;
+  background: transparent;
+  padding: 6px 8px;
+  margin: 2px 0;
+}
+
+.widget-title > button {
+  background: #1e1e2e;
+  border-radius: 6px;
+  color: #6c7086;
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+.widget-title > button:hover {
+  background: #313244;
+  color: #cdd6f4;
+}
+
+.widget-dnd {
+  background: transparent;
+  padding: 4px 8px;
+  margin: 2px 0;
+  color: #6c7086;
+  font-size: 12px;
+}
+
+.widget-dnd > switch {
+  background: #1e1e2e;
+  border-radius: 100px;
+  min-width: 34px;
+  min-height: 16px;
+}
+
+.widget-dnd > switch:checked {
+  background: #89b4fa;
+}
+
+.widget-dnd > switch slider {
+  background: #cdd6f4;
+  border-radius: 100%;
+  min-width: 12px;
+  min-height: 12px;
+}
+
+.notification-group {
+  margin: 2px 8px;
+  border-radius: 8px;
+}
+
+.notification-group-collapse-button {
+  background: transparent;
+  color: #6c7086;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.notification-group-collapse-button:hover {
+  background: #1e1e2e;
+  color: #cdd6f4;
+}
