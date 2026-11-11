@@ -8,11 +8,16 @@ REPO_ROOT="${SCRIPT_DIR}"
 SCRIPTS_DIR="${REPO_ROOT}/scripts"
 MANIFEST="${REPO_ROOT}/manifests/versions.env"
 
+WALLPAPER_SOURCE="${REPO_ROOT}/default.png"
+WALLPAPER_DIR="${HOME}/Pictures/wallpapers"
+WALLPAPER_DEST="${WALLPAPER_DIR}/default.png"
+
 LOG_DIR="${HOME}/.local/state/niri-installer/logs"
 TIMESTAMP="$(date '+%Y%m%d-%H%M%S')"
 LOG_FILE="${LOG_DIR}/install-${TIMESTAMP}.log"
 
 MODE=""
+DEPLOY_WALLPAPER=false
 
 usage() {
     cat <<'EOF'
@@ -66,6 +71,25 @@ run_script() {
 
     echo
     echo "Completed: ${description}"
+}
+
+deploy_wallpaper() {
+    if [[ "${DEPLOY_WALLPAPER}" != true ]]; then
+        return
+    fi
+
+    echo
+    echo "============================================================"
+    echo "STEP: Default wallpaper deployment"
+    echo "============================================================"
+
+    mkdir -p "${WALLPAPER_DIR}"
+
+    install -m 0644 "${WALLPAPER_SOURCE}" "${WALLPAPER_DEST}"
+
+    echo "Wallpaper installed:"
+    echo "  Source:      ${WALLPAPER_SOURCE}"
+    echo "  Destination: ${WALLPAPER_DEST}"
 }
 
 # Parse command-line arguments.
@@ -123,6 +147,7 @@ done
 # Select the installation steps.
 case "${MODE}" in
     --all)
+        DEPLOY_WALLPAPER=true
         STEPS=(
             "00-system-packages.sh|System packages and build dependencies"
             "01-install-rust.sh|Rust toolchain"
@@ -152,11 +177,17 @@ case "${MODE}" in
         )
         ;;
     --dotfiles)
+        DEPLOY_WALLPAPER=true
         STEPS=(
             "08-deploy-dotfiles.sh|Dotfiles deployment"
         )
         ;;
 esac
+
+# Verify wallpaper source if deployment is selected.
+if [[ "${DEPLOY_WALLPAPER}" == true && ! -f "${WALLPAPER_SOURCE}" ]]; then
+    fail "Default wallpaper is missing: ${WALLPAPER_SOURCE}"
+fi
 
 # Show the planned operation.
 echo
@@ -174,6 +205,12 @@ for step in "${STEPS[@]}"; do
     IFS='|' read -r script description <<< "${step}"
     echo "  - ${description} (${script})"
 done
+
+if [[ "${DEPLOY_WALLPAPER}" == true ]]; then
+    echo "  - Default wallpaper deployment"
+    echo "      ${WALLPAPER_SOURCE}"
+    echo "      -> ${WALLPAPER_DEST}"
+fi
 
 echo
 echo "No installation has started yet."
@@ -207,6 +244,9 @@ for step in "${STEPS[@]}"; do
     run_script "${script}" "${description}"
 done
 
+# Deploy the default wallpaper.
+deploy_wallpaper
+
 END_TIME="$(date +%s)"
 ELAPSED=$((END_TIME - START_TIME))
 
@@ -219,4 +259,3 @@ echo "Duration: ${ELAPSED} seconds"
 echo "Log:      ${LOG_FILE}"
 echo
 echo "All selected steps completed successfully."
-
