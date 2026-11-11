@@ -1,0 +1,222 @@
+
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${SCRIPT_DIR}"
+
+SCRIPTS_DIR="${REPO_ROOT}/scripts"
+MANIFEST="${REPO_ROOT}/manifests/versions.env"
+
+LOG_DIR="${HOME}/.local/state/niri-installer/logs"
+TIMESTAMP="$(date '+%Y%m%d-%H%M%S')"
+LOG_FILE="${LOG_DIR}/install-${TIMESTAMP}.log"
+
+MODE=""
+
+usage() {
+    cat <<'EOF'
+Niri Desktop Installer
+
+Usage:
+  ./install.sh [OPTION]
+
+Options:
+  --all        Run the complete installation (00-08).
+  --build      Install dependencies and build Niri/Noctalia (00-06).
+  --apps       Install desktop applications (07).
+  --dotfiles   Deploy configuration files using GNU Stow (08).
+  --help       Display this help message.
+
+Examples:
+  ./install.sh --all
+  ./install.sh --build
+  ./install.sh --apps
+  ./install.sh --dotfiles
+
+The installer requires Ubuntu 24.04 LTS.
+EOF
+}
+
+fail() {
+    echo
+    echo "ERROR: $*"
+    exit 1
+}
+
+run_script() {
+    local script="$1"
+    local description="$2"
+    local path="${SCRIPTS_DIR}/${script}"
+
+    if [[ ! -x "${path}" ]]; then
+        fail "Script is missing or not executable: ${path}"
+    fi
+
+    echo
+    echo "============================================================"
+    echo "STEP: ${description}"
+    echo "SCRIPT: ${script}"
+    echo "============================================================"
+    echo
+
+    if ! "${path}"; then
+        fail "Installation failed during ${description} (${script})."
+    fi
+
+    echo
+    echo "Completed: ${description}"
+}
+
+# Parse command-line arguments.
+if [[ $# -ne 1 ]]; then
+    usage
+    exit 1
+fi
+
+case "$1" in
+    --all|--build|--apps|--dotfiles)
+        MODE="$1"
+        ;;
+    --help|-h)
+        usage
+        exit 0
+        ;;
+    *)
+        usage
+        fail "Unknown option: $1"
+        ;;
+esac
+
+# Verify the operating system.
+if [[ ! -f /etc/os-release ]]; then
+    fail "Cannot identify operating system."
+fi
+
+source /etc/os-release
+
+if [[ "${ID}" != "ubuntu" || "${VERSION_ID}" != "24.04" ]]; then
+    fail "This installer requires Ubuntu 24.04 LTS."
+fi
+
+# Verify the repository structure.
+if [[ ! -f "${MANIFEST}" ]]; then
+    fail "Version manifest is missing: ${MANIFEST}"
+fi
+
+for script in \
+    00-system-packages.sh \
+    01-install-rust.sh \
+    02-build-niri.sh \
+    03-build-wireplumber.sh \
+    04-build-sdbus-cpp.sh \
+    05-install-stb-headers.sh \
+    06-build-noctalia.sh \
+    07-install-applications.sh \
+    08-deploy-dotfiles.sh
+do
+    if [[ ! -x "${SCRIPTS_DIR}/${script}" ]]; then
+        fail "Required script is missing or not executable: ${script}"
+    fi
+done
+
+# Select the installation steps.
+case "${MODE}" in
+    --all)
+        STEPS=(
+            "00-system-packages.sh|System packages and build dependencies"
+            "01-install-rust.sh|Rust toolchain"
+            "02-build-niri.sh|Niri"
+            "03-build-wireplumber.sh|WirePlumber"
+            "04-build-sdbus-cpp.sh|sdbus-c++"
+            "05-install-stb-headers.sh|STB headers"
+            "06-build-noctalia.sh|Noctalia"
+            "07-install-applications.sh|Desktop applications"
+            "08-deploy-dotfiles.sh|Dotfiles deployment"
+        )
+        ;;
+    --build)
+        STEPS=(
+            "00-system-packages.sh|System packages and build dependencies"
+            "01-install-rust.sh|Rust toolchain"
+            "02-build-niri.sh|Niri"
+            "03-build-wireplumber.sh|WirePlumber"
+            "04-build-sdbus-cpp.sh|sdbus-c++"
+            "05-install-stb-headers.sh|STB headers"
+            "06-build-noctalia.sh|Noctalia"
+        )
+        ;;
+    --apps)
+        STEPS=(
+            "07-install-applications.sh|Desktop applications"
+        )
+        ;;
+    --dotfiles)
+        STEPS=(
+            "08-deploy-dotfiles.sh|Dotfiles deployment"
+        )
+        ;;
+esac
+
+# Show the planned operation.
+echo
+echo "============================================================"
+echo "NIRI DESKTOP INSTALLER"
+echo "============================================================"
+echo "Repository: ${REPO_ROOT}"
+echo "Ubuntu:     ${VERSION_ID}"
+echo "Mode:       ${MODE}"
+echo "Steps:      ${#STEPS[@]}"
+echo
+echo "The following operations will run:"
+
+for step in "${STEPS[@]}"; do
+    IFS='|' read -r script description <<< "${step}"
+    echo "  - ${description} (${script})"
+done
+
+echo
+echo "No installation has started yet."
+read -r -p "Continue? [y/N] " answer
+
+case "${answer}" in
+    y|Y|yes|YES)
+        ;;
+    *)
+        echo "Installation cancelled."
+        exit 0
+        ;;
+esac
+
+# Initialize logging after confirmation.
+mkdir -p "${LOG_DIR}"
+
+touch "${LOG_FILE}"
+
+exec > >(tee -a "${LOG_FILE}") 2>&1
+
+START_TIME="$(date +%s)"
+
+echo
+echo "Installation started: $(date)"
+echo "Log file: ${LOG_FILE}"
+
+# Run the selected steps.
+for step in "${STEPS[@]}"; do
+    IFS='|' read -r script description <<< "${step}"
+    run_script "${script}" "${description}"
+done
+
+END_TIME="$(date +%s)"
+ELAPSED=$((END_TIME - START_TIME))
+
+echo
+echo "============================================================"
+echo "INSTALLATION COMPLETED"
+echo "============================================================"
+echo "Mode:     ${MODE}"
+echo "Duration: ${ELAPSED} seconds"
+echo "Log:      ${LOG_FILE}"
+echo
+echo "All selected steps completed successfully."
+
