@@ -1,0 +1,86 @@
+diff --git a/src/shell/wayland/clipboard_globals.cpp b/src/shell/wayland/clipboard_globals.cpp
+index 73a8b770d..d91c63a05 100644
+--- a/src/shell/wayland/clipboard_globals.cpp
++++ b/src/shell/wayland/clipboard_globals.cpp
+@@ -100,5 +100,5 @@ void ClipboardGlobals::bindVirtualKeyboardService() {
+   if (m_virtualKeyboardService == nullptr || m_virtualKeyboardManager == nullptr || seat == nullptr) {
+     return;
+   }
+-  m_virtualKeyboardService->bind(m_virtualKeyboardManager, seat);
++  m_virtualKeyboardService->bind(m_connection.display(), m_virtualKeyboardManager, seat);
+ }
+diff --git a/src/shell/wayland/virtual_keyboard_service.cpp b/src/shell/wayland/virtual_keyboard_service.cpp
+index aa9815eb8..014fcb298 100644
+--- a/src/shell/wayland/virtual_keyboard_service.cpp
++++ b/src/shell/wayland/virtual_keyboard_service.cpp
+@@ -37,17 +37,18 @@ VirtualKeyboardService::VirtualKeyboardService() = default;
+ 
+ VirtualKeyboardService::~VirtualKeyboardService() { cleanup(); }
+ 
+-bool VirtualKeyboardService::bind(zwp_virtual_keyboard_manager_v1* manager, wl_seat* seat) {
+-  if (manager == nullptr || seat == nullptr) {
++bool VirtualKeyboardService::bind(wl_display* display, zwp_virtual_keyboard_manager_v1* manager, wl_seat* seat) {
++  if (display == nullptr || manager == nullptr || seat == nullptr) {
+     cleanup();
+     return false;
+   }
+ 
+-  if (m_manager == manager && m_seat == seat && m_keyboard != nullptr) {
++  if (m_display == display && m_manager == manager && m_seat == seat && m_keyboard != nullptr) {
+     return true;
+   }
+ 
+   cleanup();
++  m_display = display;
+   m_manager = manager;
+   m_seat = seat;
+   return ensureKeyboard();
+@@ -68,6 +69,7 @@ void VirtualKeyboardService::cleanup() {
+   }
+   m_manager = nullptr;
+   m_seat = nullptr;
++  m_display = nullptr;
+   m_ctrlMask = 0;
+   m_shiftMask = 0;
+   m_keymapUploaded = false;
+@@ -92,9 +94,8 @@ bool VirtualKeyboardService::sendPasteShortcut(VirtualPasteShortcut shortcut) {
+     break;
+   }
+ 
+-  auto* display = wl_proxy_get_display(reinterpret_cast<wl_proxy*>(m_keyboard));
+-  if (display != nullptr) {
+-    wl_display_flush(display);
++  if (m_display != nullptr) {
++    wl_display_flush(m_display);
+   }
+   return true;
+ }
+diff --git a/src/shell/wayland/virtual_keyboard_service.h b/src/shell/wayland/virtual_keyboard_service.h
+index 5d69c929e..b7e385af8 100644
+--- a/src/shell/wayland/virtual_keyboard_service.h
++++ b/src/shell/wayland/virtual_keyboard_service.h
+@@ -3,6 +3,7 @@
+ #include <cstdint>
+ 
+ struct wl_seat;
++struct wl_display;
+ struct zwp_virtual_keyboard_manager_v1;
+ struct zwp_virtual_keyboard_v1;
+ struct xkb_context;
+@@ -22,7 +23,7 @@ public:
+   VirtualKeyboardService(const VirtualKeyboardService&) = delete;
+   VirtualKeyboardService& operator=(const VirtualKeyboardService&) = delete;
+ 
+-  bool bind(zwp_virtual_keyboard_manager_v1* manager, wl_seat* seat);
++  bool bind(wl_display* display, zwp_virtual_keyboard_manager_v1* manager, wl_seat* seat);
+   void cleanup();
+ 
+   bool isAvailable() const noexcept;
+@@ -35,6 +36,7 @@ private:
+   void sendKey(std::uint32_t key, bool pressed);
+   void updateModifiers(bool ctrlPressed, bool shiftPressed);
+ 
++  wl_display* m_display = nullptr;
+   zwp_virtual_keyboard_manager_v1* m_manager = nullptr;
+   wl_seat* m_seat = nullptr;
+   zwp_virtual_keyboard_v1* m_keyboard = nullptr;

@@ -121,10 +121,8 @@ spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 // spawn-at-startup "gnome-keyring-daemon" "--start" "--components=secrets"
 spawn-sh-at-startup "wl-paste --type text --watch cliphist store"
 spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
-spawn-at-startup "hypridle"
+spawn-at-startup "swayidle" "-w"
 spawn-at-startup "noctalia"
-spawn-at-startup "protonvpn-app"
-spawn-at-startup "/home/user/.local/bin/vmware-clip-sync.sh"
 
 xwayland-satellite {
     path "xwayland-satellite"
@@ -199,7 +197,6 @@ layer-rule {
 }
 
 window-rule {
-  match app-id="Brave-origin-beta"
   match app-id="librewolf"
   match app-id="Helium"
   // match app-id="foot"
@@ -344,11 +341,9 @@ binds {
 
     // ── Apps ──────────────────────────────────────────────────
     Mod+Return  hotkey-overlay-title="Terminal: Kitty"        { spawn "kitty"; }
-    Mod+B       hotkey-overlay-title="Browser: brave"         { spawn "brave"; }
     Mod+E       hotkey-overlay-title="File Manager: thunar"   { spawn "thunar"; }
     Mod+M       hotkey-overlay-title="System Monitor: btop"   { spawn-sh "kitty --single-instance --class btop -e btop"; }
     Mod+X       hotkey-overlay-title="Music: cmus"            { spawn-sh "kitty --single-instance --class cmus -e cmus"; }
-    Alt+C       hotkey-overlay-title="Color Picker"           { spawn "hyprpicker" "-a"; }
 
     // ── Noctalia Panels ────────────────────────────────────────
     //Mod+Space   hotkey-overlay-title="App Launcher"           { spawn-sh "~/.config/rofi/launcher/launcher.sh"; }
@@ -367,14 +362,12 @@ binds {
     // Everything destructive goes through the menu, which requires
     // a confirmation step before it executes.
     Mod+Escape  hotkey-overlay-title="Session Menu"  { spawn "noctalia" "msg" "panel-toggle" "session"; }
-    Mod+F1      hotkey-overlay-title="Lock Screen"   { spawn "hyprlock"; }
     Mod+F2      hotkey-overlay-title="Suspend"       { spawn "noctalia" "msg" "session" "lock-and-suspend"; }
     Mod+F6      hotkey-overlay-title="Monitors Off"  { power-off-monitors; }
 
     // ── Screenshots ────────────────────────────────────────────
     Print       repeat=false hotkey-overlay-title="Screenshot: Full"   { spawn "noctalia" "msg" "screenshot-fullscreen"; }
     Mod+Print   repeat=false hotkey-overlay-title="Screenshot: Region" { spawn "noctalia" "msg" "screenshot-region"; }
-    Mod+Shift+S repeat=false hotkey-overlay-title="Screenshot: Region + Edit" { spawn-sh "grim -t ppm -g \"$(slurp -o -d -c '#eb6f92ff' -b '#191724aa')\" - | satty -f - --copy-command wl-copy --early-exit --output-filename \"$(xdg-user-dir PICTURES)/Screenshots/Screenshot_$(date '+%Y-%m-%d_%H-%M-%S').png\""; }
 
     // ── Monitor Cycling ────────────────────────────────────────
     Mod+D        hotkey-overlay-title="Focus Next Monitor"     { focus-monitor-next; }

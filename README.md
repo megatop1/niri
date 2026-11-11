@@ -1,187 +1,136 @@
-# dotfiles
+# Niri Desktop — Ubuntu 24.04
 
-Personal Arch Linux dotfiles built around the [niri](https://github.com/YaLTeR/niri) scrollable-tiling Wayland compositor, themed with [Rosé Pine](https://rosepinetheme.com/), and driven by the [Noctalia](https://github.com/Ly-sec/noctalia) desktop shell.
+A reproducible Niri Wayland desktop environment for **Ubuntu 24.04 LTS**, built from pinned upstream source revisions and configured with Noctalia, Rosé Pine theming, and GNU Stow-managed dotfiles.
 
-Configs are organized as [GNU Stow](https://www.gnu.org/software/stow/) packages so each application can be symlinked into `$HOME` independently.
+This repository contains the installation scripts, version manifest, compatibility patches, and application configurations needed to build and deploy the desktop environment.
 
-## Screenshots
+## Features
 
-<!-- Add screenshots of your setup here. Suggested shots:
-     - Full desktop / niri overview
-     - Rofi launcher
-     - Terminal + fastfetch
-     - Noctalia control center / bar
-     - A tiled workspace layout
--->
+- **Niri:** Scrollable-tiling Wayland compositor.
+- **Noctalia:** Desktop shell, application launcher, control center, notifications, wallpaper management, session menu, and screenshots.
+- **Rosé Pine:** Consistent desktop and application theme.
+- **Rofi:** Display layout and clipboard utilities.
+- **Swayidle:** Idle management.
+- **Kitty / Alacritty:** Terminal emulators.
+- **GNU Stow:** Configuration deployment with backup and rollback safeguards.
+- **Pinned builds:** Source repositories and commits recorded in a central manifest.
 
-_Desktop_
+## Supported platform
 
-![desktop](.screenshots/desktop.png)
+| Component | Requirement |
+|---|---|
+| Operating system | Ubuntu 24.04 LTS |
+| Architecture | x86_64 |
+| Compositor | Niri |
+| Desktop shell | Noctalia |
+| Compiler | GCC / G++ 14 |
+| Rust | Version specified in `manifests/versions.env` |
+| Configuration deployment | GNU Stow |
 
-_Launcher_
+The installation scripts explicitly check the Ubuntu version before proceeding.
 
-![launcher](.screenshots/app_launcher.png)
+## Installation
 
-_Lazygit_
+Clone the repository:
 
-![terminal](.screenshots/lazygit.png)
-
-## Overview
-
-| Component | Application | Notes |
-|-----------|-------------|-------|
-| Compositor | [niri](https://github.com/YaLTeR/niri) | Scrollable-tiling Wayland WM |
-| Desktop shell | [Noctalia](https://github.com/Ly-sec/noctalia) | Bar, control center, launcher, wallpaper, session (v5) |
-| Bar (alt) | [waybar](https://github.com/Alexays/Waybar) | Alternative status bar |
-| Launcher | [rofi](https://github.com/lbonn/rofi) | App launcher, clipboard, display menu |
-| Launcher (alt) | [fuzzel](https://codeberg.org/dnkl/fuzzel) | Wayland-native launcher |
-| Notifications | [Noctalia](https://github.com/Ly-sec/noctalia) | Notifications handled by the shell (swaync config kept as fallback) |
-| Browser | [Brave](https://brave.com/) | |
-| Terminal | [alacritty](https://github.com/alacritty/alacritty) / [kitty](https://sw.kovidgoyal.net/kitty/) | Alacritty is `$TERMINAL`; kitty spawned by niri keybinds |
-| Shell | [zsh](https://www.zsh.org/) | zinit, fzf-tab, zoxide, fzf, starship |
-| Prompt | [starship](https://starship.rs/) / [oh-my-posh](https://ohmyposh.dev/) | Starship active |
-| Editor | [neovim](https://neovim.io/) | `$EDITOR` / `$VISUAL` |
-| Multiplexer | [tmux](https://github.com/tmux/tmux) | |
-| File manager | [Thunar](https://docs.xfce.org/xfce/thunar/start) / [yazi](https://github.com/sxyazi/yazi) | Thunar (GUI), yazi (TUI) |
-| Git TUI | [lazygit](https://github.com/jesseduffield/lazygit) | |
-| System monitor | [btop](https://github.com/aristocratos/btop) | |
-| Audio visualizer | [cava](https://github.com/karlstav/cava) | |
-| Audio effects | [easyeffects](https://github.com/wwmm/easyeffects) | |
-| PDF viewer | [Okular](https://okular.kde.org/) | zathura config also included |
-| Fetch | [fastfetch](https://github.com/fastfetch-cli/fastfetch) | |
-| Idle / lock | swayidle, hypridle, hyprlock | |
-| Theming | GTK 3/4, Qt5ct / Qt6ct | Rosé Pine |
-
-## Structure
-
-Each top-level directory is a Stow package. The tree inside mirrors where files land relative to `$HOME`:
-
-```
-dotfiles/
-├── alacritty/.config/alacritty/
-├── btop/.config/btop/
-├── cava/.config/cava/
-├── easyeffects/.config/easyeffects/
-├── fastfetch/.config/fastfetch/
-├── fuzzel/.config/fuzzel/
-├── gtk/.config/gtk-3.0/  gtk-4.0/
-├── lazygit/.config/lazygit/
-├── niri/.config/niri/config.kdl
-├── noctalia/.config/noctalia/
-├── nvim/.config/nvim/
-├── ohmyposh/.config/ohmyposh/
-├── qt/.config/qt5ct/  qt6ct/
-├── qt6ct/.config/qt6ct/
-├── rofi/.config/rofi/
-├── shell/.config/shell/       # shared alias / profile / secrets
-├── swayidle/.config/swayidle/
-├── swaync/.config/swaync/
-├── tmux/.config/tmux/
-├── waybar/.config/waybar/
-├── yazi/.config/yazi/
-├── zathura/.config/zathura/
-└── zsh/.config/zsh/           # ZDOTDIR (.zshrc, .zprofile)
+```bash
+git clone git@github.com:megatop1/niri.git ~/niri
+cd ~/niri
 ```
 
-The `shell/` package holds shell-agnostic config (`alias`, `profile`) sourced by zsh so bash/POSIX shells share it. `profile` exports XDG base dirs, `$EDITOR`, `$TERMINAL`, `$BROWSER`, toolchain paths (cargo, go, java, bun, fnm), and sets `ZDOTDIR` to `~/.config/zsh`.
+The installer supports four modes.
 
-## Install
+### Complete installation
 
-Requires `git` and `stow`.
-
-```sh
-git clone https://github.com/sirinezanina/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+```bash
+./install.sh --all
 ```
 
-Stow individual packages:
+Runs all installation stages in order:
 
-```sh
-stow niri noctalia zsh shell nvim tmux
+1. System dependencies
+2. Rust toolchain
+3. Niri build and installation
+4. WirePlumber build and installation
+5. sdbus-c++ build and installation
+6. STB header installation
+7. Noctalia build and installation
+8. Desktop applications
+9. Dotfile deployment
+
+### Build environment and desktop
+
+```bash
+./install.sh --build
 ```
 
-Or stow everything at once:
+Runs stages 00–06. Installs dependencies and builds Niri and Noctalia.
 
-```sh
-stow */
+### Desktop applications
+
+```bash
+./install.sh --apps
 ```
 
-This symlinks each package's contents into `$HOME` (e.g. `niri/.config/niri/config.kdl` -> `~/.config/niri/config.kdl`).
+Runs stage 07 to install the additional desktop applications.
 
-To remove a package's symlinks:
+### Configuration deployment
 
-```sh
-stow -D niri
+```bash
+./install.sh --dotfiles
 ```
 
-Restow after changes (re-sync symlinks):
+Runs stage 08 to deploy the six supported GNU Stow packages.
 
-```sh
-stow -R zsh
+The installer displays its execution plan and requires confirmation before making changes.
+
+Display help:
+
+```bash
+./install.sh --help
 ```
 
-Note: because `$ZDOTDIR` is `~/.config/zsh`, ensure your login shell loads it. `~/.zshenv` should set `export ZDOTDIR="$HOME/.config/zsh"` (or rely on `/etc/zsh/zshenv`).
+**Important:** The installer uses `sudo` for system package installation and system-wide builds. Review the scripts before running them.
 
-## Dependencies
+## Repository structure
 
-Core:
-
-```
-niri noctalia stow zsh starship
-```
-
-Wayland session / desktop tooling referenced by the niri config:
-
-```
-xdg-desktop-portal-gnome polkit-gnome gnome-keyring
-cliphist wl-clipboard hypridle hyprlock hyprpicker
-rofi swaync waybar
-```
-
-Applications bound to keys in niri:
-
-```
-kitty brave thunar okular yazi discord btop cmus nmtui bluetui
-localsend protonvpn-app
-```
-
-Shell / CLI tools:
-
-```
-fzf zoxide fnm bun tmux yazi lazygit fastfetch neovim
-```
-
-Install what you use; the list above reflects the full setup, not a hard requirement. AUR packages (e.g. `noctalia`, `bluetui`, `protonvpn-app`) need an AUR helper such as `yay` or `paru`.
-
-## Keybindings (niri)
-
-`Mod` is the Super key. Full list lives in `niri/.config/niri/config.kdl`; press `Mod+Shift+/` for the in-session hotkey overlay.
-
-| Bind | Action |
-|------|--------|
-| `Mod+Return` | Terminal (kitty) |
-| `Mod+B` | Browser (brave) |
-| `Mod+E` | File manager (thunar) |
-| `Mod+M` | Discord |
-| `Mod+G` | btop |
-| `Mod+X` | cmus |
-| `Mod+Y` | nmtui (network) |
-| `Mod+A` | bluetui (bluetooth) |
-| `Mod+Space` | App launcher (rofi) |
-| `Mod+W` | Wallpaper picker (Noctalia) |
-| `Mod+S` | Noctalia settings |
-| `Mod+N` | Control center (Noctalia) |
-| `Mod+P` | Display layout menu (rofi) |
-| `Mod+Shift+C` | Clipboard (cliphist) |
-| `Mod+Delete` | Wipe clipboard |
-| `Mod+Escape` | Session menu (Noctalia) |
-| `Mod+F12` | Lock screen (hyprlock) |
-| `Mod+Alt+C` | Color picker (hyprpicker) |
-
-## Secrets
-
-`shell/.config/shell/secrets.sh` is gitignored. Create it locally for machine-specific or private environment variables; `zsh/.config/zsh/.zprofile` sources it if present.
-
-## Theme
-
-Rosé Pine across niri, Noctalia (v5), GTK, Qt, and terminal. Wallpapers and accent colors are managed through Noctalia's wallpaper picker (`Mod+W`).
+```text
+niri/
+├── alacritty/                 # Alacritty configuration
+├── btop/                      # System monitor
+├── cava/                      # Audio visualizer
+├── docs/                      # Installation and troubleshooting guides (planned)
+├── easyeffects/               # Audio effects
+├── fastfetch/                 # System information
+├── gtk/                       # GTK theming
+├── install.sh                 # Installation orchestrator
+├── kitty/                     # Kitty terminal configuration
+├── lazygit/                   # Git TUI configuration
+├── manifests/
+│   └── versions.env           # Pinned versions and commits
+├── niri/                      # Niri configuration
+├── noctalia/                  # Noctalia configuration
+├── nvim/                      # Neovim configuration
+├── nvim-backup/               # Previous Neovim configuration
+├── ohmyposh/                  # Oh My Posh configuration
+├── patches/
+│   └── noctalia/              # Ubuntu compatibility patch
+├── qt6ct/                     # Qt6 theming
+├── rofi/                      # Rofi configuration and scripts
+├── scripts/
+│   ├── 00-system-packages.sh
+│   ├── 01-install-rust.sh
+│   ├── 02-build-niri.sh
+│   ├── 03-build-wireplumber.sh
+│   ├── 04-build-sdbus-cpp.sh
+│   ├── 05-install-stb-headers.sh
+    ├── 06-build-noctalia.sh
+    ├── 07-install-applications.sh
+    └── 08-deploy-dotfiles.sh
+├── swayidle/                  # Idle management
+├── swaync/                    # Optional/legacy notification config
+├── tmux/                      # Terminal multiplexer
+├── waybar/                    # Optional alternative status bar
+├── yazi/                      # Terminal file manager
+├── zathura/                   # PDF viewer configuration
+└── zsh/                       # Zsh configuration
