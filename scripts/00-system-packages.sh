@@ -33,6 +33,7 @@ sudo apt install -y \
     clang \
     libudev-dev \
     libgbm-dev \
+    libsodium-dev \
     libxkbcommon-dev \
     libegl1-mesa-dev \
     libwayland-dev \
