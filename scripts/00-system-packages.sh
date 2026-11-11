@@ -39,6 +39,7 @@ sudo apt install -y \
     wayland-protocols \
     libinput-dev \
     libdbus-1-dev \
+    libsecret-1-dev \
     libsystemd-dev \
     libseat-dev \
     libpipewire-0.3-dev \
