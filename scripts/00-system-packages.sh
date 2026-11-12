@@ -29,7 +29,6 @@ sudo apt install -y \
     pkg-config \
     eza \
     stow \
-    starship \
     fzf \
     gcc-14 \
     g++-14 \
@@ -91,6 +90,26 @@ sudo apt install -y \
     libsdbus-c++-dev
 
 echo
+echo "=== Installing Starship ==="
+
+if command -v starship >/dev/null 2>&1; then
+    echo "Starship is already installed."
+    starship --version
+else
+    echo "Installing Starship using the official installer..."
+
+    curl -fsSL https://starship.rs/install.sh | sh -s -- --yes
+
+    if ! command -v starship >/dev/null 2>&1; then
+        echo "ERROR: Starship installation failed or binary is not in PATH."
+        exit 1
+    fi
+
+    echo "Starship installed successfully."
+    starship --version
+fi
+
+echo
 echo "=== Configuring eza aliases ==="
 
 BASHRC="${HOME}/.bashrc"
@@ -116,8 +135,18 @@ echo
 echo "Base packages installed."
 echo "Ubuntu version: ${VERSION_ID}"
 
+echo
 echo "GCC:"
 gcc-14 --version
 
+echo
 echo "G++:"
 g++-14 --version
+
+echo
+echo "Starship:"
+starship --version
+
+echo
+echo "fzf:"
+fzf --version
