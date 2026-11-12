@@ -19,6 +19,39 @@ PACKAGES=(
 BACKUP_DIR=""
 DEPLOYMENT_STARTED=false
 
+# Resolve the deployed configuration path for each Stow package.
+package_target() {
+    local package="$1"
+
+    if [[ "${package}" == "starship" ]]; then
+        printf '%s\n' "${CONFIG_DIR}/starship.toml"
+    else
+        printf '%s\n' "${CONFIG_DIR}/${package}"
+    fi
+}
+
+# Resolve the expected configuration source for each Stow package.
+package_source() {
+    local package="$1"
+
+    if [[ "${package}" == "starship" ]]; then
+        printf '%s\n' "${REPO_ROOT}/starship/.config/starship.toml"
+    else
+        printf '%s\n' "${REPO_ROOT}/${package}/.config/${package}"
+    fi
+}
+
+# Resolve the previous repository's configuration source.
+package_old_source() {
+    local package="$1"
+
+    if [[ "${package}" == "starship" ]]; then
+        printf '%s\n' "${OLD_REPO}/starship/.config/starship.toml"
+    else
+        printf '%s\n' "${OLD_REPO}/${package}/.config/${package}"
+    fi
+}
+
 cleanup() {
     local status=$?
 
@@ -34,14 +67,15 @@ cleanup() {
         # Restore previously deployed package symlinks.
         if [[ -n "${BACKUP_DIR}" && -d "${BACKUP_DIR}" ]]; then
             for package in "${PACKAGES[@]}"; do
+                local target
+                target="$(package_target "${package}")"
+
                 if [[ -L "${BACKUP_DIR}/${package}" ]]; then
-                    if [[ -e "${CONFIG_DIR}/${package}" ||
-                          -L "${CONFIG_DIR}/${package}" ]]; then
-                        rm -- "${CONFIG_DIR}/${package}"
+                    if [[ -e "${target}" || -L "${target}" ]]; then
+                        rm -- "${target}"
                     fi
 
-                    mv "${BACKUP_DIR}/${package}" \
-                        "${CONFIG_DIR}/${package}"
+                    mv "${BACKUP_DIR}/${package}" "${target}"
                 fi
             done
 
@@ -102,13 +136,19 @@ for package in "${PACKAGES[@]}"; do
     echo "OK: ${package}"
 done
 
+# Verify the Starship configuration exists.
+if [[ ! -f "$(package_source starship)" ]]; then
+    echo "ERROR: Starship configuration is missing."
+    exit 1
+fi
+
 echo
 echo "=== Checking existing configuration paths ==="
 
 for package in "${PACKAGES[@]}"; do
-    target="${CONFIG_DIR}/${package}"
-    expected_old="${OLD_REPO}/${package}/.config/${package}"
-    expected_new="${REPO_ROOT}/${package}/.config/${package}"
+    target="$(package_target "${package}")"
+    expected_old="$(package_old_source "${package}")"
+    expected_new="$(package_source "${package}")"
 
     if [[ -L "${target}" ]]; then
         resolved="$(readlink -f "${target}")"
@@ -175,7 +215,7 @@ echo "=== Backing up existing symlinks ==="
 BACKUP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/niri-stow-backup.XXXXXX")"
 
 for package in "${PACKAGES[@]}"; do
-    target="${CONFIG_DIR}/${package}"
+    target="$(package_target "${package}")"
 
     if [[ -L "${target}" ]]; then
         cp -a "${target}" "${BACKUP_DIR}/${package}"
@@ -195,7 +235,7 @@ echo
 echo "=== Removing old configuration symlinks ==="
 
 for package in "${PACKAGES[@]}"; do
-    target="${CONFIG_DIR}/${package}"
+    target="$(package_target "${package}")"
 
     if [[ -L "${target}" ]]; then
         rm -- "${target}"
@@ -219,8 +259,8 @@ echo
 echo "=== Verifying deployed configurations ==="
 
 for package in "${PACKAGES[@]}"; do
-    target="${CONFIG_DIR}/${package}"
-    expected="${REPO_ROOT}/${package}/.config/${package}"
+    target="$(package_target "${package}")"
+    expected="$(package_source "${package}")"
 
     if [[ ! -L "${target}" ]]; then
         echo "ERROR: Missing configuration symlink: ${target}"
@@ -231,7 +271,8 @@ for package in "${PACKAGES[@]}"; do
 
     if [[ "${actual}" != "${expected}" ]]; then
         echo "ERROR: Incorrect destination for ${package}:"
-        echo "${actual}"
+        echo "Expected: ${expected}"
+        echo "Actual:   ${actual}"
         exit 1
     fi
 
@@ -277,9 +318,6 @@ FZF_MARKER="# >>> Niri fzf integration >>>"
 if ! command -v fzf >/dev/null 2>&1; then
     echo "WARNING: fzf is not installed. Skipping fzf integration."
 else
-    FZF_KEY_BINDINGS="/usr/share/doc/fzf/examples/key-bindings.bash"
-    FZF_COMPLETION="/usr/share/doc/fzf/examples/completion.bash"
-
     if ! grep -qF "${FZF_MARKER}" "${BASHRC}"; then
         cat >> "${BASHRC}" <<'EOF'
 
@@ -313,6 +351,7 @@ EOF
     fi
 fi
 
+# All deployment operations have completed successfully.
 DEPLOYMENT_STARTED=false
 
 echo
