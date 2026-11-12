@@ -27,6 +27,7 @@ sudo apt install -y \
     meson \
     ninja-build \
     pkg-config \
+    eza \
     stow \
     gcc-14 \
     g++-14 \
@@ -86,6 +87,28 @@ sudo apt install -y \
     librsvg2-dev \
     libstb-dev \
     libsdbus-c++-dev
+
+echo
+echo "=== Configuring eza aliases ==="
+
+BASHRC="${HOME}/.bashrc"
+
+if ! grep -qF '# >>> Niri eza aliases >>>' "${BASHRC}"; then
+    cat >> "${BASHRC}" <<'EOF'
+
+# >>> Niri eza aliases >>>
+alias ls='eza --icons --color=always'
+alias ll='eza -lah --icons --color=always'
+alias la='eza -a --icons --color=always'
+alias l='eza -lah --icons --color=always'
+alias lt='eza --tree --icons'
+# <<< Niri eza aliases <<<
+EOF
+
+    echo "eza aliases added to ${BASHRC}"
+else
+    echo "eza aliases already configured. Skipping."
+fi
 
 echo
 echo "Base packages installed."
