@@ -29,6 +29,8 @@ sudo apt install -y \
     pkg-config \
     eza \
     stow \
+    starship \
+    fzf \
     gcc-14 \
     g++-14 \
     clang \

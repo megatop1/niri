@@ -1,0 +1,56 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+add_newline = true
+
+format = """
+[](#cba6f7)\
+[  ](fg:#1e1e2e bg:#cba6f7)\
+$username\
+[](fg:#cba6f7 bg:#89b4fa)\
+[  ](fg:#1e1e2e bg:#89b4fa)\
+$hostname\
+[](fg:#89b4fa bg:#313244)\
+[  ](fg:#cdd6f4 bg:#313244)\
+$directory\
+[](fg:#313244)\
+$git_branch\
+$git_status\
+$line_break\
+$character"""
+
+right_format = "$cmd_duration"
+
+[username]
+show_always = true
+format = "[$user ]($style)"
+style_user = "bold fg:#1e1e2e bg:#cba6f7"
+style_root = "bold fg:#f38ba8 bg:#cba6f7"
+
+[hostname]
+ssh_only = false
+format = "[$hostname ]($style)"
+style = "bold fg:#1e1e2e bg:#89b4fa"
+
+[directory]
+format = "[$path ]($style)"
+style = "bold fg:#cdd6f4 bg:#313244"
+truncation_length = 3
+truncate_to_repo = true
+read_only = " "
+
+[git_branch]
+symbol = " "
+format = "[$symbol$branch ]($style)"
+style = "bold fg:#a6e3a1"
+
+[git_status]
+format = "[$all_status$ahead_behind ]($style)"
+style = "bold fg:#f38ba8"
+
+[cmd_duration]
+min_time = 2000
+format = "[󰔛 $duration](fg:#f9e2af)"
+
+[character]
+success_symbol = "[❯](bold fg:#a6e3a1)"
+error_symbol = "[❯](bold fg:#f38ba8)"

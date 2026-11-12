@@ -4,6 +4,7 @@ set -Eeuo pipefail
 REPO_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 OLD_REPO="${HOME}/dotfiles"
 CONFIG_DIR="${HOME}/.config"
+BASHRC="${HOME}/.bashrc"
 
 PACKAGES=(
     niri
@@ -12,6 +13,7 @@ PACKAGES=(
     alacritty
     rofi
     swayidle
+    starship
 )
 
 BACKUP_DIR=""
@@ -243,8 +245,75 @@ fi
 
 echo "OK: Swaync is not deployed."
 
+echo
+echo "=== Configuring Starship Bash integration ==="
+
+STARSHIP_MARKER="# >>> Niri Starship initialization >>>"
+
+if [[ ! -f "${BASHRC}" ]]; then
+    touch "${BASHRC}"
+fi
+
+if ! grep -qF "${STARSHIP_MARKER}" "${BASHRC}"; then
+    cat >> "${BASHRC}" <<'EOF'
+
+# >>> Niri Starship initialization >>>
+if command -v starship >/dev/null 2>&1; then
+    eval "$(starship init bash)"
+fi
+# <<< Niri Starship initialization <<<
+EOF
+
+    echo "Starship initialization added to ${BASHRC}"
+else
+    echo "Starship initialization already exists. Skipping."
+fi
+
+echo
+echo "=== Configuring fzf Bash integration ==="
+
+FZF_MARKER="# >>> Niri fzf integration >>>"
+
+if ! command -v fzf >/dev/null 2>&1; then
+    echo "WARNING: fzf is not installed. Skipping fzf integration."
+else
+    FZF_KEY_BINDINGS="/usr/share/doc/fzf/examples/key-bindings.bash"
+    FZF_COMPLETION="/usr/share/doc/fzf/examples/completion.bash"
+
+    if ! grep -qF "${FZF_MARKER}" "${BASHRC}"; then
+        cat >> "${BASHRC}" <<'EOF'
+
+# >>> Niri fzf integration >>>
+export FZF_DEFAULT_OPTS="\
+--height=40% \
+--layout=reverse \
+--border=rounded \
+--color=fg:#cdd6f4,bg:#1e1e2e,hl:#f38ba8 \
+--color=fg+:#cdd6f4,bg+:#313244,hl+:#f38ba8 \
+--color=info:#cba6f7,prompt:#89b4fa,pointer:#f5c2e7 \
+--color=marker:#a6e3a1,spinner:#f9e2af,header:#89b4fa"
+
+if [[ -f /usr/share/doc/fzf/examples/key-bindings.bash ]]; then
+    source /usr/share/doc/fzf/examples/key-bindings.bash
+elif [[ -f /usr/share/fzf/key-bindings.bash ]]; then
+    source /usr/share/fzf/key-bindings.bash
+fi
+
+if [[ -f /usr/share/doc/fzf/examples/completion.bash ]]; then
+    source /usr/share/doc/fzf/examples/completion.bash
+elif [[ -f /usr/share/fzf/completion.bash ]]; then
+    source /usr/share/fzf/completion.bash
+fi
+# <<< Niri fzf integration <<<
+EOF
+
+        echo "fzf initialization added to ${BASHRC}"
+    else
+        echo "fzf initialization already exists. Skipping."
+    fi
+fi
+
 DEPLOYMENT_STARTED=false
 
 echo
 echo "Dotfiles deployment complete."
-
