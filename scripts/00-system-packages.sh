@@ -9,6 +9,24 @@ require_supported_ubuntu
 echo "Updating Ubuntu package indexes..."
 sudo apt update
 
+echo "Installing eza repository prerequisites..."
+sudo apt install -y gpg wget
+
+echo "Adding the official eza APT repository..."
+
+sudo mkdir -p /etc/apt/keyrings
+
+wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
+    | sudo gpg --dearmor --yes -o /etc/apt/keyrings/gierens.gpg
+
+echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
+    | sudo tee /etc/apt/sources.list.d/gierens.list >/dev/null
+
+sudo chmod 644 /etc/apt/keyrings/gierens.gpg
+sudo chmod 644 /etc/apt/sources.list.d/gierens.list
+
+sudo apt update
+
 echo "Installing desktop integration and build dependencies..."
 
 sudo apt install -y \
@@ -125,6 +143,25 @@ EOF
     echo "eza aliases added to ${BASHRC}"
 else
     echo "eza aliases already configured. Skipping."
+fi
+
+echo
+echo "=== Configuring eza theme environment ==="
+
+EZA_COLOR_MARKER="# >>> Niri eza color environment >>>"
+
+if ! grep -qF "${EZA_COLOR_MARKER}" "${BASHRC}"; then
+    cat >> "${BASHRC}" <<'EOF'
+
+# >>> Niri eza color environment >>>
+# Let eza use its own theme instead of GNU dircolors.
+unset LS_COLORS
+# <<< Niri eza color environment <<<
+EOF
+
+    echo "eza color environment configured in ${BASHRC}"
+else
+    echo "eza color environment already configured. Skipping."
 fi
 
 echo

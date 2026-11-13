@@ -9,6 +9,7 @@ BASHRC="${HOME}/.bashrc"
 PACKAGES=(
     niri
     noctalia
+    eza
     kitty
     alacritty
     rofi
