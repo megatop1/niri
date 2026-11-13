@@ -2,52 +2,111 @@
 order = ["main"]
 
 [bar.main]
-background_opacity = 0.4
-capsule = false
-border_width = 0.0
-center = ["workspaces"]
-end = ["tray", "group:g1", "group:g2", "group:g5"]
-margin_edge = 3
+position = "top"
+enabled = true
+
+# Floating bar appearance
+background_opacity = 0.64
+border = "#8E8F90"
+border_width = 0.5
+compositor_blur = true
+
+# Layout
+margin_edge = 10
+margin_ends = 300
 reserve_space = true
-start = ["group:g3", "group:g4", "media"]
-widget_spacing = 12
+thickness = 42
+padding = 10
+widget_spacing = 6
 
+# Rounded appearance
+radius = 18
+concave_edge_corners = false
+
+# Capsule defaults
+capsule = false
+capsule_fill = "surface_container"
+capsule_opacity = 0.5
+capsule_radius = 18
+capsule_border_width = 1.0
+capsule_thickness = 0.76
+
+hover_highlight = true
+show_tooltip = true
+show_on_workspace_switch = false
+
+# LEFT: Clock, date and active window
+start = [
+    "launcher",
+    "group:g1",
+    "active_window"
+]
+
+# CENTER: Workspaces and media
+center = [
+    "group:g4",
+    "group:g3"
+]
+
+# RIGHT: System monitoring, hardware and session
+end = [
+    "group:g2",
+    "session"
+]
+
+# Clock and date
 [[bar.main.capsule_group]]
-fill = "surface_variant"
 id = "g1"
-members = ["volume", "input_volume"]
-opacity = 0.5
-padding = 6.0
-radius = 10.0
-
-[[bar.main.capsule_group]]
-fill = "surface_variant"
-id = "g2"
-members = ["brightness", "battery"]
-opacity = 0.5
-padding = 6.0
-radius = 10.0
-
-[[bar.main.capsule_group]]
-fill = "surface_variant"
-id = "g3"
 members = ["clock", "date"]
+enabled = true
+fill = "surface_container"
+border = "surface_container_highest"
+border_width = 1.0
 opacity = 0.5
-padding = 6.0
-radius = 10.0
+padding = 9.0
+radius = 18.0
 
+# Hardware indicators
 [[bar.main.capsule_group]]
-fill = "surface_variant"
-id = "g4"
+id = "g2"
+members = [
+    "tray",
+    "battery",
+    "network",
+    "output_volume",
+    "notifications",
+    "control-center"
+]
+enabled = true
+fill = "surface_container"
+border = "surface_container_highest"
+border_width = 1.0
+opacity = 0.5
+padding = 9.0
+radius = 18.0
+
+# System monitoring
+[[bar.main.capsule_group]]
+id = "g3"
 members = ["cpu", "ram", "temp"]
+enabled = true
+fill = "surface_container"
+border = "surface_container_highest"
+border_width = 1.0
 opacity = 0.5
 padding = 6.0
-radius = 10.0
+radius = 18.0
+widget_spacing = 5
 
+# Workspace and media
 [[bar.main.capsule_group]]
-fill = "surface_variant"
-id = "g5"
-members = ["notifications", "control-center"]
+id = "g4"
+members = ["workspaces"]
+enabled = true
+fill = "surface_container"
+border = "surface_container_highest"
+border_width = 1.0
 opacity = 0.5
-padding = 6.0
-radius = 10.0
+padding = 9.0
+radius = 18.0
+
