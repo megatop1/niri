@@ -13,6 +13,8 @@ echo "Installing desktop integration and build dependencies..."
 
 sudo apt install -y \
     git \
+    vim \
+    neovim \
     curl \
     wget \
     build-essential \
@@ -20,6 +22,7 @@ sudo apt install -y \
     meson \
     ninja-build \
     pkg-config \
+    xclip \
     eza \
     stow \
     fzf \

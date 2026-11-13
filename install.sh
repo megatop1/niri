@@ -130,7 +130,8 @@ for script in \
     05-install-stb-headers.sh \
     06-build-noctalia.sh \
     07-install-applications.sh \
-    08-deploy-dotfiles.sh
+    08-deploy-dotfiles.sh \
+    09-install-nerd-fonts.sh
 do
     if [[ ! -x "${SCRIPTS_DIR}/${script}" ]]; then
         fail "Required script is missing or not executable: ${script}"
@@ -150,6 +151,7 @@ case "${MODE}" in
             "05-install-stb-headers.sh|STB headers"
             "06-build-noctalia.sh|Noctalia"
             "07-install-applications.sh|Desktop applications"
+            "09-install-nerd-fonts.sh|Nerd Fonts"
             "08-deploy-dotfiles.sh|Dotfiles deployment"
         )
         ;;
@@ -167,6 +169,7 @@ case "${MODE}" in
     --apps)
         STEPS=(
             "07-install-applications.sh|Desktop applications"
+            "09-install-nerd-fonts.sh|Nerd Fonts"
         )
         ;;
     --dotfiles)
