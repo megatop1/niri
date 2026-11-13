@@ -1,6 +1,6 @@
-# Niri Desktop — Ubuntu 24.04
+# Niri Desktop — Ubuntu 24.04 / 26.04
 
-A reproducible Niri Wayland desktop environment for **Ubuntu 24.04 LTS**, built from pinned upstream source revisions and configured with Noctalia, Rosé Pine theming, and GNU Stow-managed dotfiles.
+A reproducible Niri Wayland desktop environment for **Ubuntu 24.04 LTS and Ubuntu 26.04 LTS**, built from pinned upstream source revisions and configured with Noctalia, Rosé Pine theming, and GNU Stow-managed dotfiles.
 
 This repository contains the installation scripts, version manifest, compatibility patches, and application configurations needed to build and deploy the desktop environment.
 
@@ -19,7 +19,7 @@ This repository contains the installation scripts, version manifest, compatibili
 
 | Component | Requirement |
 |---|---|
-| Operating system | Ubuntu 24.04 LTS |
+| Operating system | Ubuntu 24.04 LTS / Ubuntu 26.04 LTS |
 | Architecture | x86_64 |
 | Compositor | Niri |
 | Desktop shell | Noctalia |
@@ -27,7 +27,7 @@ This repository contains the installation scripts, version manifest, compatibili
 | Rust | Version specified in `manifests/versions.env` |
 | Configuration deployment | GNU Stow |
 
-The installation scripts explicitly check the Ubuntu version before proceeding.
+The installation scripts use a shared platform check and support Ubuntu 24.04 LTS and Ubuntu 26.04 LTS.
 
 ## Installation
 

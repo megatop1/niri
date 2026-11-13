@@ -3,12 +3,10 @@ set -euo pipefail
 
 echo "=== Desktop application installation ==="
 
-source /etc/os-release
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/platform.sh"
+require_supported_ubuntu
 
-if [[ "${ID}" != "ubuntu" || "${VERSION_ID}" != "24.04" ]]; then
-    echo "ERROR: This installer requires Ubuntu 24.04 LTS."
-    exit 1
-fi
 
 echo "Updating package indexes..."
 sudo apt update

@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ ! -f /etc/os-release ]]; then
-    echo "Cannot identify operating system."
-    exit 1
-fi
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/platform.sh"
+require_supported_ubuntu
 
-source /etc/os-release
-
-if [[ "${ID}" != "ubuntu" || "${VERSION_ID}" != "24.04" ]]; then
-    echo "This installer requires Ubuntu 24.04 LTS."
-    exit 1
-fi
 
 echo "Updating Ubuntu package indexes..."
 sudo apt update

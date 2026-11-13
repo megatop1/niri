@@ -38,7 +38,7 @@ Examples:
   ./install.sh --apps
   ./install.sh --dotfiles
 
-The installer requires Ubuntu 24.04 LTS.
+The installer supports Ubuntu 24.04 LTS and Ubuntu 26.04 LTS.
 EOF
 }
 
@@ -112,15 +112,9 @@ case "$1" in
 esac
 
 # Verify the operating system.
-if [[ ! -f /etc/os-release ]]; then
-    fail "Cannot identify operating system."
-fi
+source "${SCRIPTS_DIR}/lib/platform.sh"
+require_supported_ubuntu || fail "Unsupported operating system."
 
-source /etc/os-release
-
-if [[ "${ID}" != "ubuntu" || "${VERSION_ID}" != "24.04" ]]; then
-    fail "This installer requires Ubuntu 24.04 LTS."
-fi
 
 # Verify the repository structure.
 if [[ ! -f "${MANIFEST}" ]]; then
