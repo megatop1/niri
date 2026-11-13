@@ -58,3 +58,14 @@ type = "session"
 directory = "~/Pictures/Screenshots"
 save-to-file = true
 copy-to-clipboard = false
+
+[shell.launcher]
+layout = "simple"
+categories = true
+category_icons_only = true
+show_icons = true
+compact = false
+app_grid = false
+
+[shell.panel]
+transparency_mode = "glass"
