@@ -128,22 +128,34 @@ echo "=== Configuring eza aliases ==="
 
 BASHRC="${HOME}/.bashrc"
 
-if ! grep -qF '# >>> Niri eza aliases >>>' "${BASHRC}"; then
-    cat >> "${BASHRC}" <<'EOF'
+# Replace the existing managed eza block so installer updates are applied.
+sed -i \
+    '/^# >>> Niri eza aliases >>>$/,/^# <<< Niri eza aliases <<<$/{d;}' \
+    "${BASHRC}"
+
+cat >> "${BASHRC}" <<'BASHRC_EZA'
 
 # >>> Niri eza aliases >>>
-alias ls='eza --icons --color=always'
+# Translate the familiar GNU ls -thral combination for eza.
+unalias ls 2>/dev/null || true
+
+ls() {
+    if [[ "${1:-}" == "-thral" ]]; then
+        shift
+        command eza -lah --icons --color=always --sort=modified "$@"
+    else
+        command eza --icons --color=always "$@"
+    fi
+}
+
 alias ll='eza -lah --icons --color=always'
 alias la='eza -a --icons --color=always'
 alias l='eza -lah --icons --color=always'
 alias lt='eza --tree --icons'
 # <<< Niri eza aliases <<<
-EOF
+BASHRC_EZA
 
-    echo "eza aliases added to ${BASHRC}"
-else
-    echo "eza aliases already configured. Skipping."
-fi
+echo "eza aliases configured in ${BASHRC}"
 
 echo
 echo "=== Configuring eza theme environment ==="
@@ -151,13 +163,13 @@ echo "=== Configuring eza theme environment ==="
 EZA_COLOR_MARKER="# >>> Niri eza color environment >>>"
 
 if ! grep -qF "${EZA_COLOR_MARKER}" "${BASHRC}"; then
-    cat >> "${BASHRC}" <<'EOF'
+    cat >> "${BASHRC}" <<'BASHRC_COLOR'
 
 # >>> Niri eza color environment >>>
 # Let eza use its own theme instead of GNU dircolors.
 unset LS_COLORS
 # <<< Niri eza color environment <<<
-EOF
+BASHRC_COLOR
 
     echo "eza color environment configured in ${BASHRC}"
 else
