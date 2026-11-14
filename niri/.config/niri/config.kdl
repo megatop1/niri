@@ -19,6 +19,8 @@ cursor {
 }
 
 input {
+  mod-key "Alt"
+
   keyboard {
     xkb {
       layout "us,fr"
@@ -443,10 +445,10 @@ binds {
     Mod+Equal        { set-column-width "+10%"; }
     Mod+Shift+Minus  { set-window-height "-10%"; }
     Mod+Shift+Equal  { set-window-height "+10%"; }
-    Mod+Alt+H        { set-window-width "-10%"; }
-    Mod+Alt+L        { set-window-width "+10%"; }
-    Mod+Alt+J        { set-window-height "+10%"; }
-    Mod+Alt+K        { set-window-height "-10%"; }
+    Super+Alt+H        { set-window-width "-10%"; }
+    Super+Alt+L        { set-window-width "+10%"; }
+    Super+Alt+J        { set-window-height "+10%"; }
+    Super+Alt+K        { set-window-height "-10%"; }
 
     // ── Scroll ─────────────────────────────────────────────────
     Mod+WheelScrollDown           cooldown-ms=150 { focus-workspace-down; }
