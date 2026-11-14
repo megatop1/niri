@@ -758,7 +758,8 @@ for dir in \
     /opt/tools/enum \
     /opt/tools/c2/sliver \
     /opt/tools/pivot/ligolo-ng \
-    /opt/tools/pivot/chisel; do
+    /opt/tools/pivot/chisel \
+    /opt/tools/misc; do
 
     install -d -o "${GITHUB_USER}" -g "${GITHUB_GROUP}" "${dir}"
 done
@@ -931,13 +932,76 @@ echo "Chisel v${CHISEL_VERSION} installed."
 
 
 # ------------------------------------------------------------
+# Arsenal - Pentesting Command Launcher
+# Location: /opt/tools/misc/arsenal
+# ------------------------------------------------------------
+
+echo
+echo "============================================================"
+echo " Installing Arsenal"
+echo "============================================================"
+
+ARSENAL_DIR="/opt/tools/misc/arsenal"
+
+# Create the destination directory.
+install -d -o "${GITHUB_USER}" -g "${GITHUB_GROUP}" \
+    /opt/tools/misc
+
+# Clone Arsenal or update the existing repository.
+if [[ -d "${ARSENAL_DIR}/.git" ]]; then
+    echo "Arsenal already exists. Updating..."
+
+    runuser -u "${GITHUB_USER}" -- \
+        git -C "${ARSENAL_DIR}" pull --ff-only
+else
+    echo "Cloning Arsenal..."
+
+    runuser -u "${GITHUB_USER}" -- \
+        git clone https://github.com/Orange-Cyberdefense/arsenal.git \
+        "${ARSENAL_DIR}"
+fi
+
+# Create an isolated Python environment if needed.
+if [[ ! -x "${ARSENAL_DIR}/.venv/bin/python" ]]; then
+    runuser -u "${GITHUB_USER}" -- \
+        python3 -m venv "${ARSENAL_DIR}/.venv"
+fi
+
+# Install/update Python dependencies as the normal user.
+runuser -u "${GITHUB_USER}" -- \
+    "${ARSENAL_DIR}/.venv/bin/python" -m pip install --upgrade pip
+
+runuser -u "${GITHUB_USER}" -- \
+    "${ARSENAL_DIR}/.venv/bin/python" -m pip install \
+    -r "${ARSENAL_DIR}/requirements.txt"
+
+# Create a system-wide launcher using the isolated Python environment.
+cat > /usr/local/bin/arsenal <<'EOF'
+#!/usr/bin/env bash
+
+cd /opt/tools/misc/arsenal || exit 1
+
+export TERM="${TERM:-xterm-256color}"
+
+exec /opt/tools/misc/arsenal/.venv/bin/python -m arsenal "$@"
+EOF
+
+chmod 0755 /usr/local/bin/arsenal
+
+echo "[OK] Arsenal installed."
+echo "  Repository: ${ARSENAL_DIR}"
+echo "  Python environment: ${ARSENAL_DIR}/.venv"
+echo "  Command: arsenal"
+
+# ------------------------------------------------------------
 # Finalize tool directory permissions
 # ------------------------------------------------------------
 
 chown -R "${GITHUB_USER}:${GITHUB_GROUP}" \
     /opt/tools/enum \
     /opt/tools/c2 \
-    /opt/tools/pivot
+    /opt/tools/pivot \
+    /opt/tools/misc
 
 echo
 echo "C2 and pivoting tools installed successfully."
@@ -945,7 +1009,6 @@ echo "C2 and pivoting tools installed successfully."
 echo
 echo "Installed directories:"
 find /opt/tools/{enum,c2,pivot} -maxdepth 2 -type f -printf '%p\n'
-
 
 # ------------------------------------------------------------
 # Install Burp Suite Community Edition
@@ -1461,6 +1524,7 @@ declare -A TOOL_PATHS=(
     [msldap]="/usr/local/bin/msldap"
     [pwsh]="/usr/bin/pwsh"
     [obsidian]="/usr/bin/obsidian"
+    [arsenal]="/usr/local/bin/arsenal"
 )
 
 for tool in "${!TOOL_PATHS[@]}"; do
