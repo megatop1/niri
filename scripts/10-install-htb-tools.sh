@@ -109,7 +109,6 @@ PACKAGES=(
     make
     jq
     python3-netifaces
-    golang-go
     postgresql
 )
 
@@ -121,6 +120,85 @@ echo
 
 apt-get install -y "${PACKAGES[@]}"
 
+
+# ------------------------------------------------------------
+# Install latest stable Go release
+# ------------------------------------------------------------
+
+echo
+echo "============================================================"
+echo " Installing latest stable Go"
+echo "============================================================"
+
+# Detect supported system architecture.
+case "$(uname -m)" in
+    x86_64)
+        GO_ARCH="amd64"
+        ;;
+    aarch64)
+        GO_ARCH="arm64"
+        ;;
+    *)
+        echo "[ERROR] Unsupported Go architecture: $(uname -m)"
+        exit 1
+        ;;
+esac
+
+# Retrieve official Go release metadata.
+GO_RELEASES="$(curl -fsSL 'https://go.dev/dl/?mode=json')"
+
+GO_VERSION="$(jq -r '[.[] | select(.stable == true)][0].version' <<< "${GO_RELEASES}")"
+
+if [[ -z "${GO_VERSION}" || "${GO_VERSION}" == "null" ]]; then
+    echo "[ERROR] Could not determine the latest stable Go version."
+    exit 1
+fi
+
+GO_ARCHIVE="${GO_VERSION}.linux-${GO_ARCH}.tar.gz"
+
+GO_SHA256="$(jq -r \
+    --arg version "${GO_VERSION}" \
+    --arg filename "${GO_ARCHIVE}" \
+    '.[] | select(.version == $version) | .files[] | select(.filename == $filename) | .sha256' \
+    <<< "${GO_RELEASES}")"
+
+if [[ -z "${GO_SHA256}" || "${GO_SHA256}" == "null" ]]; then
+    echo "[ERROR] Could not retrieve Go archive checksum."
+    exit 1
+fi
+
+echo "Latest stable release: ${GO_VERSION}"
+echo "Architecture: ${GO_ARCH}"
+
+GO_TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "${GO_TMP_DIR}"' EXIT
+
+curl -fsSL \
+    "https://go.dev/dl/${GO_ARCHIVE}" \
+    -o "${GO_TMP_DIR}/${GO_ARCHIVE}"
+
+# Verify the official SHA-256 checksum.
+echo "${GO_SHA256}  ${GO_TMP_DIR}/${GO_ARCHIVE}" | sha256sum -c -
+
+# Replace the previous official Go installation.
+rm -rf /usr/local/go
+
+tar -C /usr/local -xzf "${GO_TMP_DIR}/${GO_ARCHIVE}"
+
+# Configure system-wide Go PATH.
+cat > /etc/profile.d/go.sh <<'EOF'
+export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
+EOF
+
+chmod 0644 /etc/profile.d/go.sh
+
+# Make Go available to the remaining installer steps immediately.
+export PATH="/usr/local/go/bin:${PATH}"
+
+echo "[OK] Go ${GO_VERSION} installed."
+echo "  Location: /usr/local/go"
+echo "  Go binary: $(command -v go)"
+go version
 
 # ------------------------------------------------------------
 # Install Docker CE
