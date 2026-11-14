@@ -1235,6 +1235,193 @@ echo
 echo "Metasploit Framework installation complete."
 echo "Launch with: msfconsole"
 
+
+# ------------------------------------------------------------
+# Configure Vim for Notes
+# ------------------------------------------------------------
+
+echo
+echo "============================================================"
+echo " Configuring Vim Notes Environment"
+echo "============================================================"
+
+VIM_USER="${SUDO_USER:-}"
+
+if [[ -z "${VIM_USER}" || "${VIM_USER}" == "root" ]]; then
+    echo "ERROR: Could not determine the original user."
+    exit 1
+fi
+
+VIM_HOME="$(getent passwd "${VIM_USER}" | cut -d: -f6)"
+VIM_GROUP="$(id -gn "${VIM_USER}")"
+
+if [[ -z "${VIM_HOME}" || ! -d "${VIM_HOME}" ]]; then
+    echo "ERROR: Could not determine the user's home directory."
+    exit 1
+fi
+
+VIM_CONFIG_DIR="${VIM_HOME}/.vim"
+VIM_SYNTAX_DIR="${VIM_CONFIG_DIR}/syntax"
+VIM_FTDETECT_DIR="${VIM_CONFIG_DIR}/ftdetect"
+VIMRC="${VIM_HOME}/.vimrc"
+
+# Create Vim configuration directories.
+install -d -o "${VIM_USER}" -g "${VIM_GROUP}" \
+    "${VIM_SYNTAX_DIR}" \
+    "${VIM_FTDETECT_DIR}"
+
+# ------------------------------------------------------------
+# Install custom Notes syntax highlighting
+# ------------------------------------------------------------
+
+cat > "${VIM_SYNTAX_DIR}/notes.vim" <<'EOF'
+if exists("b:current_syntax")
+    finish
+endif
+
+" Timestamps
+syntax match NotesTimestamp /\d\{4}-\d\{2}-\d\{2} \d\{2}:\d\{2}:\d\{2} \a\+ --/
+
+" Folding markers
+syntax match NotesFoldMarker /<<<\|>>>/
+
+" Inline commands
+syntax match NotesCommand /`[^`]*`/
+
+" TODO entries
+syntax match NotesTodo /TODO:.*/
+
+" Comments
+syntax match NotesComment /\/\/.*/
+
+" Headings
+syntax match NotesH1 /^#[^#].*/
+syntax match NotesH2 /^##[^#].*/
+syntax match NotesH3 /^###[^#].*/
+
+" Alerts
+syntax match NotesAlert /^!.*$/
+
+" Colors
+highlight NotesTimestamp guifg=#00d9ff ctermfg=cyan gui=bold
+highlight NotesFoldMarker guifg=#ffcc00 ctermfg=yellow gui=bold
+highlight NotesCommand guifg=#50fa7b ctermfg=green
+highlight NotesTodo guifg=#ff5555 ctermfg=red gui=bold
+highlight NotesComment guifg=#b58900 ctermfg=yellow gui=italic
+
+" Heading colors
+highlight NotesH1 guifg=#50fa7b ctermfg=green gui=bold
+highlight NotesH2 guifg=#61afef ctermfg=Blue gui=bold
+highlight NotesH3 guifg=#c678dd ctermfg=Magenta gui=bold
+
+" Red alert text with black background
+highlight NotesAlert guifg=#ff5555 guibg=#000000 ctermfg=red ctermbg=black gui=bold
+
+let b:current_syntax = "notes"
+EOF
+
+# ------------------------------------------------------------
+# Automatically detect Notes files
+# ------------------------------------------------------------
+
+cat > "${VIM_FTDETECT_DIR}/notes.vim" <<'EOF'
+augroup notes_filetype
+    autocmd!
+    autocmd BufRead,BufNewFile *.notes,*.note setfiletype notes
+augroup END
+EOF
+
+# ------------------------------------------------------------
+# Update the managed section of .vimrc
+# Preserve all user configuration outside the managed section.
+# ------------------------------------------------------------
+
+VIMRC_TMP="$(mktemp)"
+
+if [[ -f "${VIMRC}" ]]; then
+    awk '
+        /^" >>> Niri Notes Vim Configuration >>>/ {
+            skip = 1
+            next
+        }
+
+        /^" <<< Niri Notes Vim Configuration <<< / {
+            skip = 0
+            next
+        }
+
+        !skip {
+            print
+        }
+    ' "${VIMRC}" > "${VIMRC_TMP}"
+else
+    : > "${VIMRC_TMP}"
+fi
+
+cat >> "${VIMRC_TMP}" <<'EOF'
+
+" >>> Niri Notes Vim Configuration >>>
+
+" Syntax and filetype support
+syntax enable
+filetype on
+filetype plugin indent on
+
+" Truecolor support
+if has('termguicolors')
+    set termguicolors
+endif
+
+set background=dark
+
+" Folding
+set foldmethod=marker
+set foldmarker=<<<,>>>
+set foldenable
+set foldlevelstart=0
+
+" Editor appearance
+set cursorline
+highlight CursorLine guibg=#2b2840 ctermbg=NONE
+
+set number
+set mouse=a
+set ruler
+set showcmd
+
+" Insert Eastern Time timestamp with F5
+nnoremap <F5> I<C-R>=substitute(system("TZ=America/New_York date '+%Y-%m-%d %H:%M:%S %Z -- '"), '\n$', '', '')<CR>
+
+" Emoji abbreviations
+iabbrev :check: ✅
+iabbrev :fail: ❌
+iabbrev :comp: 💻
+iabbrev :clean: 🧹
+iabbrev :alarm: 🚨
+
+" <<< Niri Notes Vim Configuration <<<
+EOF
+
+# Replace the existing Vim configuration.
+install -o "${VIM_USER}" -g "${VIM_GROUP}" \
+    -m 0644 "${VIMRC_TMP}" "${VIMRC}"
+
+rm -f "${VIMRC_TMP}"
+
+# Set ownership of Vim configuration files.
+chown -R "${VIM_USER}:${VIM_GROUP}" "${VIM_CONFIG_DIR}"
+
+echo
+echo "[OK] Vim Notes configuration installed."
+echo "  [OK] Custom Notes syntax highlighting"
+echo "  [OK] Blue and purple headings"
+echo "  [OK] Red alerts with black background"
+echo "  [OK] Subtle current-line highlighting"
+echo "  [OK] Folding markers"
+echo "  [OK] F5 timestamp shortcut"
+echo "  [OK] Emoji abbreviations"
+echo "  [OK] Automatic .notes and .note detection"
+
 # ------------------------------------------------------------
 # Installation summary.
 # ------------------------------------------------------------
