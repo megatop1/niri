@@ -311,26 +311,41 @@ else
     echo "Starship initialization already exists. Skipping."
 fi
 
-echo
-echo "=== Configuring fzf Bash integration ==="
 
-FZF_MARKER="# >>> Niri fzf integration >>>"
+echo
+echo "=== Configuring fzf Catppuccin Mocha integration ==="
 
 if ! command -v fzf >/dev/null 2>&1; then
     echo "WARNING: fzf is not installed. Skipping fzf integration."
 else
-    if ! grep -qF "${FZF_MARKER}" "${BASHRC}"; then
-        cat >> "${BASHRC}" <<'EOF'
+    # Remove previous managed fzf configuration blocks.
+    sed -i \
+        '/^# >>> Niri fzf integration >>>$/,/^# <<< Niri fzf integration <<<$/{d;}' \
+        "${BASHRC}"
+
+    sed -i \
+        '/^# >>> Niri fzf Catppuccin Mocha >>>$/,/^# <<< Niri fzf Catppuccin Mocha <<<$/{d;}' \
+        "${BASHRC}"
+
+    # Install one consolidated, updatable fzf configuration.
+    cat >> "${BASHRC}" <<'BASHRC_FZF'
 
 # >>> Niri fzf integration >>>
-export FZF_DEFAULT_OPTS="\
---height=40% \
---layout=reverse \
---border=rounded \
---color=fg:#cdd6f4,bg:#1e1e2e,hl:#f38ba8 \
---color=fg+:#cdd6f4,bg+:#313244,hl+:#f38ba8 \
---color=info:#cba6f7,prompt:#89b4fa,pointer:#f5c2e7 \
---color=marker:#a6e3a1,spinner:#f9e2af,header:#89b4fa"
+# Catppuccin Mocha theme and Bash integration.
+
+export FZF_DEFAULT_OPTS="
+    --height=60%
+    --layout=reverse
+    --border=rounded
+    --info=inline
+    --color=bg:#1e1e2e,fg:#cdd6f4
+    --color=bg+:#313244,fg+:#cdd6f4
+    --color=hl:#f38ba8,hl+:#f38ba8
+    --color=info:#cba6f7,prompt:#cba6f7
+    --color=pointer:#f5e0dc,marker:#b4befe
+    --color=spinner:#f5c2e7,header:#89b4fa
+    --color=border:#6c7086,gutter:#1e1e2e
+"
 
 if [[ -f /usr/share/doc/fzf/examples/key-bindings.bash ]]; then
     source /usr/share/doc/fzf/examples/key-bindings.bash
@@ -344,12 +359,9 @@ elif [[ -f /usr/share/fzf/completion.bash ]]; then
     source /usr/share/fzf/completion.bash
 fi
 # <<< Niri fzf integration <<<
-EOF
+BASHRC_FZF
 
-        echo "fzf initialization added to ${BASHRC}"
-    else
-        echo "fzf initialization already exists. Skipping."
-    fi
+    echo "fzf Catppuccin Mocha configuration installed in ${BASHRC}"
 fi
 
 # All deployment operations have completed successfully.
