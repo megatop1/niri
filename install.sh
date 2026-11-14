@@ -30,6 +30,7 @@ Options:
   --build      Install dependencies and build Niri/Noctalia (00-06).
   --apps       Install desktop applications (07).
   --dotfiles   Deploy configuration files using GNU Stow (08).
+  --htb        Install HTB and penetration testing tools (10).
   --help       Display this help message.
 
 Examples:
@@ -37,6 +38,7 @@ Examples:
   ./install.sh --build
   ./install.sh --apps
   ./install.sh --dotfiles
+  ./install.sh --htb 
 
 The installer supports Ubuntu 24.04 LTS and Ubuntu 26.04 LTS.
 EOF
@@ -98,7 +100,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 case "$1" in
-    --all|--build|--apps|--dotfiles)
+    --all|--build|--apps|--dotfiles|--htb)
         MODE="$1"
         ;;
     --help|-h)
@@ -151,8 +153,9 @@ case "${MODE}" in
             "05-install-stb-headers.sh|STB headers"
             "06-build-noctalia.sh|Noctalia"
             "07-install-applications.sh|Desktop applications"
-            "09-install-nerd-fonts.sh|Nerd Fonts"
             "08-deploy-dotfiles.sh|Dotfiles deployment"
+            "09-install-nerd-fonts.sh|Nerd Fonts"
+	    "10-install-htb-tools.sh|HTB and penetration testing tools"
         )
         ;;
     --build)
@@ -176,6 +179,11 @@ case "${MODE}" in
         DEPLOY_WALLPAPER=true
         STEPS=(
             "08-deploy-dotfiles.sh|Dotfiles deployment"
+        )
+        ;;
+    --htb)
+        STEPS=(
+            "10-install-htb-tools.sh|HTB and penetration testing tools"
         )
         ;;
 esac
