@@ -1327,7 +1327,8 @@ EOF
 cat > "${VIM_FTDETECT_DIR}/notes.vim" <<'EOF'
 augroup notes_filetype
     autocmd!
-    autocmd BufRead,BufNewFile *.notes,*.note setfiletype notes
+    autocmd BufRead,BufNewFile *.notes,*.note,notes setfiletype notes
+    autocmd BufRead,BufNewFile *.txt setlocal filetype=notes
 augroup END
 EOF
 
