@@ -110,6 +110,8 @@ PACKAGES=(
     jq
     python3-netifaces
     postgresql
+    freerdp3-wayland
+    remmina
 )
 
 echo
