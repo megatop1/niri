@@ -43,6 +43,8 @@ sudo apt install -y \
     xclip \
     eza \
     stow \
+    cmatrix \
+    screen \
     fzf \
     gcc-14 \
     g++-14 \
