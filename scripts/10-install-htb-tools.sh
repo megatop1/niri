@@ -1413,6 +1413,78 @@ install -d -o "${VIM_USER}" -g "${VIM_GROUP}" \
     "${VIM_SYNTAX_DIR}" \
     "${VIM_FTDETECT_DIR}"
 
+
+
+
+# ------------------------------------------------------------
+# Neovim Shared Vim Configuration
+# ------------------------------------------------------------
+
+echo
+echo "============================================================"
+echo " Configuring Neovim Shared Vim Settings"
+echo "============================================================"
+
+TOOLS_HOME="$(getent passwd "${TOOLS_USER}" | cut -d: -f6)"
+
+if [[ -z "${TOOLS_HOME}" || ! -d "${TOOLS_HOME}" ]]; then
+    echo "[ERROR] Could not determine home directory for ${TOOLS_USER}."
+    exit 1
+fi
+
+NVIM_CONFIG_DIR="${TOOLS_HOME}/.config/nvim"
+NVIM_INIT="${NVIM_CONFIG_DIR}/init.vim"
+
+# Create Neovim configuration directory.
+install -d -o "${TOOLS_USER}" -g "${TOOLS_GROUP}" \
+    "${NVIM_CONFIG_DIR}"
+
+# Create init.vim if it does not exist.
+if [[ ! -f "${NVIM_INIT}" ]]; then
+    install -o "${TOOLS_USER}" -g "${TOOLS_GROUP}" \
+        -m 0644 /dev/null "${NVIM_INIT}"
+fi
+
+# Remove previous installer-managed configuration blocks.
+TEMP_NVIM_INIT="$(mktemp)"
+
+awk '
+/^" >>> Niri Shared Vim Configuration >>>$/ { skip=1; next }
+/^" <<< Niri Shared Vim Configuration <<<$/{ skip=0; next }
+/^" >>> Niri Wayland Clipboard >>>$/ { skip=1; next }
+/^" <<< Niri Wayland Clipboard <<<$/{ skip=0; next }
+!skip { print }
+' "${NVIM_INIT}" > "${TEMP_NVIM_INIT}"
+
+# Load the existing Vim configuration and custom runtime files.
+cat >> "${TEMP_NVIM_INIT}" <<'EOF'
+
+" >>> Niri Shared Vim Configuration >>>
+
+" Load custom Vim syntax and filetype configuration.
+execute 'set runtimepath^=' . fnameescape(expand('~/.vim'))
+execute 'set runtimepath+=' . fnameescape(expand('~/.vim/after'))
+
+" Reuse the existing Vim configuration.
+if filereadable(expand('~/.vimrc'))
+    execute 'source' fnameescape(expand('~/.vimrc'))
+endif
+
+" Use the Wayland desktop clipboard by default.
+set clipboard=unnamedplus
+
+" <<< Niri Shared Vim Configuration <<<
+EOF
+
+install -o "${TOOLS_USER}" -g "${TOOLS_GROUP}" \
+    -m 0644 "${TEMP_NVIM_INIT}" "${NVIM_INIT}"
+
+rm -f "${TEMP_NVIM_INIT}"
+
+echo "[OK] Neovim shared Vim configuration installed."
+echo "[OK] Custom syntax and filetype support enabled."
+echo "[OK] Wayland clipboard enabled."
+
 # ------------------------------------------------------------
 # Install custom Notes syntax highlighting
 # ------------------------------------------------------------
